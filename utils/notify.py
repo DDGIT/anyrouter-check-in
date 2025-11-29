@@ -82,7 +82,8 @@ class NotificationKit:
 		if not self.weixin_webhook:
 			raise ValueError('WeChat Work Webhook not configured')
 
-		data = {'msgtype': 'text', 'text': {'content': f'{title}\n{content}'}}
+		# data = {'msgtype': 'text', 'text': {'content': f'{title}\n{content}'}}
+		data = {'title': f'{title}',"content": f'{title}\n{content}','description': 'anyrouter签到通知'}
 		with httpx.Client(timeout=30.0) as client:
 			client.post(self.weixin_webhook, json=data)
 
