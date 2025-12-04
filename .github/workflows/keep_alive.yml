@@ -1,8 +1,8 @@
-name: HYDE-platform-Keep Alive
+name: HYDE-platform保活
 
 on:
   schedule:
-    - cron: '*/5 * * * *'  # 每15分钟运行一次
+    - cron: '*/30 * * * *'  # 每15分钟运行一次
   workflow_dispatch:        # 允许手动运行
 
 jobs:
@@ -19,7 +19,7 @@ jobs:
           fi
           
           echo "Pinging ${{ secrets.HF_SPACE_URL }}..."
-          response=$(curl -s -o /dev/null -w "%{http_code}" ${{ secrets.HF_SPACE_URL }}/api/health)
+          response=$(curl -s ${{ secrets.HF_SPACE_URL }}/api/health)
           
           if [ "$response" -eq 200 ]; then
             echo "Success! Status code: $response"
