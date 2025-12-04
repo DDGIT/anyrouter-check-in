@@ -1,27 +1,32 @@
-name: Keep Alive
+name: 保活：hyde-platform
 
 on:
   schedule:
-    - cron: '*/15 * * * *'  # 每15分钟运行一次
+    - cron: '*/30 * * * *'  # 每15分钟运行一次
   workflow_dispatch:        # 允许手动运行
 
 jobs:
   ping:
     runs-on: ubuntu-latest
-    # environment: production # 不再需要 Environment
-    env:
-      HF_SPACE_URL: 'https://platform.613.qzz.io' # 直接在此处修改您的 URL
+    environment: production
     steps:
       - name: Check HF Space status
         run: |
-          echo "Pinging $HF_SPACE_URL..."
+          # 从 Environment Variables 读取
+          HF_SPACE_URL="${{ vars.HF_SPACE_URL }}"
           
+          if [ -z "$HF_SPACE_URL" ]; then
+            echo "Error: HF_SPACE_URL variable is not set in 'production' environment."
+            echo "Please go to Settings -> Environments -> production -> Environment variables and add HF_SPACE_URL."
+            exit 1
+          fi
+
           # 移除 URL 末尾可能的斜杠
           BASE_URL="$HF_SPACE_URL"
           BASE_URL=${BASE_URL%/}
           
           TARGET_URL="$BASE_URL/api/health"
-          echo "Target URL: $TARGET_URL"
+          echo "Pinging $TARGET_URL..."
 
           # 添加 User-Agent 伪装，添加 -L 跟随重定向，添加 -S 显示错误
           response=$(curl -s -S -L -o /dev/null -w "%{http_code}" \
