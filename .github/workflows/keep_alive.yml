@@ -8,7 +8,7 @@ on:
 jobs:
   ping:
     runs-on: ubuntu-latest
-    environment: production # 如果您没有在 GitHub Settings -> Environments 中配置 production，请注释掉此行
+    environment: production
     steps:
       - name: Check HF Space status
         run: |
@@ -23,6 +23,15 @@ jobs:
           # 移除 URL 末尾可能的斜杠
           BASE_URL="${{ secrets.HF_SPACE_URL }}"
           BASE_URL=${BASE_URL%/}
+
+          # DEBUG: 检查变量是否为空
+          if [ -z "$BASE_URL" ]; then
+            echo "CRITICAL ERROR: BASE_URL is empty after processing! Check your secrets."
+            exit 1
+          fi
+          
+          TARGET_URL="$BASE_URL/api/health"
+          echo "Target URL: $TARGET_URL"
 
           # 添加 User-Agent 伪装，添加 -L 跟随重定向，添加 -S 显示错误
           response=$(curl -s -S -L -o /dev/null -w "%{http_code}" \
