@@ -8,27 +8,17 @@ on:
 jobs:
   ping:
     runs-on: ubuntu-latest
-    environment: production
+    # environment: production # 不再需要 Environment
+    env:
+      HF_SPACE_URL: 'https://platform.613.qzz.io' # 直接在此处修改您的 URL
     steps:
       - name: Check HF Space status
         run: |
-          if [ -z "${{ secrets.HF_SPACE_URL }}" ]; then
-            echo "Error: HF_SPACE_URL secret is not set."
-            echo "Please set the HF_SPACE_URL secret in your repository settings."
-            exit 1
-          fi
-          
-          echo "Pinging ${{ secrets.HF_SPACE_URL }}..."
+          echo "Pinging $HF_SPACE_URL..."
           
           # 移除 URL 末尾可能的斜杠
-          BASE_URL="${{ secrets.HF_SPACE_URL }}"
+          BASE_URL="$HF_SPACE_URL"
           BASE_URL=${BASE_URL%/}
-
-          # DEBUG: 检查变量是否为空
-          if [ -z "$BASE_URL" ]; then
-            echo "CRITICAL ERROR: BASE_URL is empty after processing! Check your secrets."
-            exit 1
-          fi
           
           TARGET_URL="$BASE_URL/api/health"
           echo "Target URL: $TARGET_URL"
@@ -36,7 +26,7 @@ jobs:
           # 添加 User-Agent 伪装，添加 -L 跟随重定向，添加 -S 显示错误
           response=$(curl -s -S -L -o /dev/null -w "%{http_code}" \
             -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" \
-            "$BASE_URL/api/health")
+            "$TARGET_URL")
           
           if [ "$response" -eq 200 ]; then
             echo "Success! Status code: $response"
