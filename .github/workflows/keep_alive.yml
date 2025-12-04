@@ -1,0 +1,27 @@
+name: Keep Alive
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'  # 每15分钟运行一次
+  workflow_dispatch:        # 允许手动运行
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check HF Space status
+        run: |
+          if [ -z "${{ secrets.HF_SPACE_URL }}" ]; then
+            echo "Error: HF_SPACE_URL secret is not set."
+            echo "Please set the HF_SPACE_URL secret in your repository settings."
+            exit 1
+          fi
+          
+          echo "Pinging ${{ secrets.HF_SPACE_URL }}..."
+          response=$(curl -s -o /dev/null -w "%{http_code}" ${{ secrets.HF_SPACE_URL }}/api/health)
+          
+          if [ "$response" -eq 200 ]; then
+            echo "Success! Status code: $response"
+          else
+            echo "Warning: Received status code $response"
+          fi
